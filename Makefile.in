@@ -179,6 +179,7 @@ LIBNETDISSECT_SRC=\
 	print-ppp.c \
 	print-pppoe.c \
 	print-pptp.c \
+	print-quic-test.c \
 	print-radius.c \
 	print-raw.c \
 	print-rip.c \

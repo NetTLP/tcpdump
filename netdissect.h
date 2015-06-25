@@ -423,6 +423,7 @@ extern u_int lane_if_print(netdissect_options *, const struct pcap_pkthdr *, con
 extern void otv_print(netdissect_options *, const u_char *, u_int);
 extern void ahcp_print(netdissect_options *, const u_char *, const u_int);
 extern void vxlan_print(netdissect_options *, const u_char *, u_int);
+extern void quic_print(netdissect_options *, const u_char *, u_int);
 extern u_int arcnet_if_print(netdissect_options *, const struct pcap_pkthdr *, const u_char *);
 extern u_int arcnet_linux_if_print(netdissect_options *, const struct pcap_pkthdr *, const u_char *);
 extern void bfd_print(netdissect_options *, const u_char *, u_int, u_int);

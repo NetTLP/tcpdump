@@ -92,6 +92,7 @@ struct udphdr {
 #define OTV_PORT                8472  /* draft-hasmit-otv-04 */
 #define VXLAN_PORT              4789  /* RFC 7348 */
 #define GENEVE_PORT             6081  /* draft-gross-geneve-02 */
+#define QUIC_PORT		6121  /* https://www.chromium.org/quic/playing-with-quic */
 
 #ifdef INET6
 #define RIPNG_PORT              521   /* RFC 2080 */
