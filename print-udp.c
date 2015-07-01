@@ -684,6 +684,8 @@ udp_print(netdissect_options *ndo, register const u_char *bp, u_int length,
 			quic_print(ndo, (const u_char *)(up + 1), length);
                 else if (ISPORT(80))	/* XXX: for test */
 			quic_print(ndo, (const u_char *)(up + 1), length);
+                else if (ISPORT(443))	/* XXX: for test */
+			quic_print(ndo, (const u_char *)(up + 1), length);
 		else {
 			if (ulen > length)
 				ND_PRINT((ndo, "UDP, bad length %u > %u",

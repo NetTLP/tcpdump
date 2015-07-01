@@ -99,24 +99,23 @@ quic_print(netdissect_options *ndo, const u_char *bp, u_int len)
 	case QUIC_PUB_FLAG_1BYTE_CID :
 		NEXTLEN (len, 1);
 		cid = *bp;
-		ND_PRINT ((ndo, "cid[1b] 0x%x, ", cid));
 		bp += 1;
 		break;
 
 	case QUIC_PUB_FLAG_4BYTE_CID :
 		NEXTLEN (len, 4);
-		cid = EXTRACT_32BITS(bp);
-		ND_PRINT ((ndo, "cid[4b] 0x%x, ", cid));
+		cid = *((uint32_t *)bp);
 		bp += 4;
 		break;
 
 	case QUIC_PUB_FLAG_8BYTE_CID :
 		NEXTLEN (len, 8);
-		cid = EXTRACT_64BITS(bp);
-		ND_PRINT ((ndo, "cid[8b] 0x%x, ", cid));
+		cid = *((uint64_t *)bp);
 		bp += 8;
 		break;
 	}
+	ND_PRINT ((ndo, "connection id %lu, ", cid));
+
 
 	if (public_flags & QUIC_PUB_FLAG_VERSION) {
 		NEXTLEN (len, 4);
@@ -129,31 +128,28 @@ quic_print(netdissect_options *ndo, const u_char *bp, u_int len)
 	case 0 :
 		NEXTLEN (len, 1);
 		seq = *bp;
-		ND_PRINT ((ndo, "seq[1b] %u, " , seq));
 		bp += 1;
 		break;
 
 	case QUIC_PUB_FLAG_2BYTE_SEQ :
 		NEXTLEN (len, 2);
-		seq = EXTRACT_16BITS (bp);
-		ND_PRINT ((ndo, "seq[2b] %u, ", seq));
+		seq = *((uint16_t *)bp);
 		bp += 2;
 		break;
 
 	case QUIC_PUB_FLAG_4BYTE_SEQ :
 		NEXTLEN (len, 4);
-		seq = EXTRACT_32BITS (bp);
-		ND_PRINT ((ndo, "seq[4b] %u, ", seq));
+		seq = *((uint32_t *)bp);
 		bp += 4;
 		break;
 
 	case QUIC_PUB_FLAG_6BYTE_SEQ :
 		NEXTLEN (len, 6);
-		seq = EXTRACT_48BITS (bp);
-		ND_PRINT ((ndo, "seq[6b] %u, ", seq));
+		seq = *((uint64_t *)bp);
 		bp += 6;
 		break;
 	}
+	ND_PRINT ((ndo, "sequence %lu, ", seq));
 
 #if 0	/* XXX: ??? */
 	NEXTLEN (len, 1);
