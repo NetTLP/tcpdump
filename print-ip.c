@@ -477,6 +477,11 @@ again:
 		pgm_print(ndo, ipds->cp, ipds->len, (const u_char *)ipds->ip);
 		break;
 
+	case 253:
+		/* XXX: ovstack */
+		ovstack_print (ndo, ipds->cp, ipds->len);
+		break;
+
 	default:
 		if (ndo->ndo_nflag==0 && (proto = getprotobynumber(ipds->nh)) != NULL)
 			ND_PRINT((ndo, " %s", proto->p_name));

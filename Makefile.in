@@ -217,6 +217,7 @@ LIBNETDISSECT_SRC=\
 	print-wb.c \
 	print-zephyr.c \
 	print-zeromq.c \
+	print-ovstack.c \
 	signature.c \
 	util-print.c
 
