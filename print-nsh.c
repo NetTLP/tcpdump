@@ -38,6 +38,7 @@
 void
 nsh_print(netdissect_options *ndo, const u_char *bp, u_int len)
 {
+    int nhlen, n;
     uint8_t ver;
     uint8_t flag_o;
     uint8_t flag_c;
@@ -46,12 +47,9 @@ nsh_print(netdissect_options *ndo, const u_char *bp, u_int len)
     uint8_t next_protocol;
     uint32_t service_path_id;
     uint8_t service_index;
-    uint32_t net_plt_ctx;
-    uint32_t net_shd_ctx;
-    uint32_t svc_plt_ctx;
-    uint32_t svc_shd_ctx;
+    uint32_t ctx;
 
-    if (len < 24) {
+    if (len < 8) {
         ND_PRINT((ndo, "[|NSH]"));
         return;
     }
@@ -70,14 +68,8 @@ nsh_print(netdissect_options *ndo, const u_char *bp, u_int len)
     bp += 3;
     service_index = *bp;
     bp += 1;
-    net_plt_ctx = EXTRACT_32BITS(bp);
-    bp += 4;
-    net_shd_ctx = EXTRACT_32BITS(bp);
-    bp += 4;
-    svc_plt_ctx = EXTRACT_32BITS(bp);
-    bp += 4;
-    svc_shd_ctx = EXTRACT_32BITS(bp);
-    bp += 4;
+
+    nhlen = length << 2;
 
     ND_PRINT((ndo, "NSH, "));
     if (1 < ndo->ndo_vflag) {
@@ -93,23 +85,26 @@ nsh_print(netdissect_options *ndo, const u_char *bp, u_int len)
     }
     ND_PRINT((ndo, "Service Path ID 0x%06x, ", service_path_id));
     ND_PRINT((ndo, "Service Index 0x%x", service_index));
-    if (2 < ndo->ndo_vflag) {
-        ND_PRINT((ndo, "\n        Network Platform Context: 0x%08x", net_plt_ctx));
-        ND_PRINT((ndo, "\n        Network Shared Context  : 0x%08x", net_shd_ctx));
-        ND_PRINT((ndo, "\n        Service Platform Context: 0x%08x", svc_plt_ctx));
-        ND_PRINT((ndo, "\n        Service Shared Context  : 0x%08x", svc_shd_ctx));
+
+
+    for (n = 0; n < (nhlen - 8); n += 4) {
+	ctx = EXTRACT_32BITS(bp);
+	bp += 4;
+	if (2 < ndo->ndo_vflag) {
+	    ND_PRINT((ndo, "\n        Context[%02d]: 0x%08x", n / 4, ctx));
+	}
     }
     ND_PRINT((ndo, ndo->ndo_vflag ? "\n    " : ": "));
 
     switch (next_protocol) {
     case 0x1:
-        ip_print(ndo, bp, len - 24);
+        ip_print(ndo, bp, len - nhlen);
         break;
     case 0x2:
-        ip6_print(ndo, bp, len - 24);
+        ip6_print(ndo, bp, len - nhlen);
         break;
     case 0x3:
-        ether_print(ndo, bp, len - 24, len - 24, NULL, NULL);
+        ether_print(ndo, bp, len - nhlen, len - nhlen, NULL, NULL);
         break;
     default:
         ND_PRINT((ndo, "[|NSH]"));
