@@ -76,6 +76,7 @@ const struct tok ethertype_values[] = {
     { ETHERTYPE_CFM_OLD,        "CFM (old)" },
     { ETHERTYPE_CFM,            "CFM" },
     { ETHERTYPE_IEEE1905_1,     "IEEE1905.1" },
+    { ETHERTYPE_NSH,		"NSH" },
     { ETHERTYPE_LLDP,           "LLDP" },
     { ETHERTYPE_TIPC,           "TIPC"},
     { ETHERTYPE_GEONET_OLD,     "GeoNet (old)"},
@@ -426,6 +427,10 @@ ethertype_print(netdissect_options *ndo,
 
 	case ETHERTYPE_MEDSA:
 		medsa_print(ndo, p, length, caplen);
+		return (1);
+
+	case ETHERTYPE_NSH:
+		nsh_print (ndo, p, length);
 		return (1);
 
 	case ETHERTYPE_LAT:

@@ -184,6 +184,9 @@
 #ifndef	ETHERTYPE_IEEE1905_1
 #define	ETHERTYPE_IEEE1905_1    0x893a /* IEEE 1905.1 */
 #endif
+#ifndef ETHERTYPE_NSH
+#define ETHERTYPE_NSH		0x894f	/* Cisco vPath Network Service Header*/
+#endif
 #ifndef	ETHERTYPE_ISO
 #define	ETHERTYPE_ISO           0xfefe  /* nonstandard - used in Cisco HDLC encapsulation */
 #endif
