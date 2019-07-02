@@ -720,6 +720,7 @@ extern void zep_print(netdissect_options *, const u_char *, u_int);
 extern void zephyr_print(netdissect_options *, const u_char *, int);
 extern void zmtp1_print(netdissect_options *, const u_char *, u_int);
 extern void zmtp1_datagram_print(netdissect_options *, const u_char *, const u_int);
+extern void nettlp_print(netdissect_options *, const u_char *, u_int);
 
 /* checksum routines */
 extern void init_checksum(void);

@@ -240,6 +240,7 @@ LIBNETDISSECT_SRC=\
 	print-zep.c \
 	print-zephyr.c \
 	print-zeromq.c \
+	print-nettlp.c \
 	signature.c \
 	strtoaddr.c \
 	util-print.c
@@ -304,6 +305,7 @@ HDR = \
 	tcp.h \
 	timeval-operations.h \
 	udp.h \
+	nettlp.h \
 	varattrs.h
 
 TAGHDR = \
