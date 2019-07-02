@@ -27,8 +27,16 @@ struct nettlp_hdr {
 struct tlp_hdr {
 	uint8_t		fmt_type;	/* Formant and Type */
 	uint8_t		tclass;		/* Traffic Class */
-	uint16_t	flag_len;	/* Flags, Attrs, and Length */
 
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	uint16_t	length:12;	/* Length with Reserved */
+	uint8_t		flags:4;	/* Flags and Attrs */
+#elif __BYTE_ORDER == __BIG_ENDIAN
+	uint8_t		flags:4;	/* Flags and Attrs */
+	uint16_t	length:12;	/* Length with Reserved */
+#else
+# error "Please fix <endian.h>"
+#endif
 } __attribute__((packed));
 
 /* TLP Format */
@@ -74,47 +82,33 @@ struct tlp_hdr {
 		
 
 /* TLP Flags */
-#define TLP_FLAG_MASK		0xC000
-#define tlp_flag(fl) ((ntohs(fl) & TLP_FLAG_MASK) >> 14)
+#define TLP_FLAG_MASK		0xC
+#define tlp_flag(fl) (fl & TLP_FLAG_MASK)
 
-#define TLP_FLAG_DIGEST_MASK	0x2
+#define TLP_FLAG_DIGEST_MASK	0x8
 #define tlp_flag_digest(fl) (tlp_flag(fl) & TLP_FLAG_DIGEST_MASK)
-#define tlp_flag_set_digest(fl) \
-	fl = htons((ntohs(fl) | (TLP_FLAG_DIGEST_MASK << 14)))
-#define tlp_flag_unset_digest(fl) \
-	fl = htons((ntohs(fl) | (TLP_FLAG_DIGEST_MASK << 14)))
+#define tlp_flag_set_digest(fl) (fl |= TLP_FLAG_DIGEST_MASK)
+#define tlp_flag_unset_digest(fl) (fl &= ~TLP_FLAG_DIGEST_MASK)
 
-#define TLP_FLAG_EP_MASK	0x1
+#define TLP_FLAG_EP_MASK	0x4
 #define tlp_flag_ep(fl) (tlp_flag(fl) & TLP_FLAG_EP_MASK)
-#define tlp_flag_set_ep(fl) \
-	fl = htons((ntohs(fl) | (TLP_FLAG_EP_MASK << 14)))
-#define tlp_flag_unset_ep(fl) \
-	fl = htons((ntohs(fl) | (TLP_FLAG_EP_MASK << 14)))
+#define tlp_flag_set_ep(fl) (fl |= TLP_FLAG_EP_MASK)
+#define tlp_flag_unset_ep(fl) (fl &= ~TLP_FLAG_EP_MASK)
 
 
 /* TLP Attrs */
-#define TLP_ATTR_MASK		0x3000
-#define tlp_attr(fl) ((ntohs(fl) & TLP_ATTR_MASK) >> 14)
+#define TLP_ATTR_MASK		0x3
+#define tlp_attr(fl) (fl & TLP_ATTR_MASK)
 
-#define TLP_ATTR_RELAX_MASK	0x2
+#define TLP_ATTR_RELAX_MASK	0x8
 #define tlp_attr_relax(fl) (tlp_attr(fl) & TLP_ATTR_RELAX_MASK)
-#define tlp_attr_set_relax(fl) \
-	fl = htons((ntohs(fl) | (TLP_ATTR_RELAX_MASK << 14)))
-#define tlp_attr_unset_relax(fl) \
-	fl = htons((ntohs(fl) | (TLP_ATTR_RELAX_MASK << 14)))
+#define tlp_attr_set_relax(fl) (fl |= TLP_ATTR_RELAX_MASK)
+#define tlp_attr_unset_relax(fl) (fl &= ~TLP_ATTR_RELAX_MASK)
 
-#define TLP_ATTR_NOSNP_MASK	0x1
+#define TLP_ATTR_NOSNP_MASK	0x4
 #define tlp_attr_nosnp(fl) (tlp_attr(fl) & TLP_ATTR_NOSNP_MASK)
-#define tlp_attr_set_nosnp(fl) \
-	fl = htons((ntohs(fl) | (TLP_ATTR_NOSNP_MASK << 14)))
-#define tlp_attr_unset_nosnp(fl) \
-	fl = htons((ntohs(fl) | (TLP_ATTR_NOSNP_MASK << 14)))
-
-/* TLP Length */
-#define TLP_LENGTH_MASK		0x03FF
-#define tlp_len(fl) (ntohs(fl) & TLP_LENGTH_MASK)
-#define tlp_set_len(fl, v) \
-	fl = (fl & ~TLP_LENGTH_MASK) | (htons(fl) & TLP_LENGTH_MASK)
+#define tlp_attr_set_nosnp(fl) (fl |= TLP_ATTR_NOSNP_MASK)
+#define tlp_attr_unset_nosnp(fl) (fl &= ~TLP_ATTR_NOSNP_MASK)
 
 
 
@@ -173,9 +167,9 @@ struct tlp_mr_hdr {
  * +---------------+---------------+---------------+---------------+
  * |R|Fmt|  Type   |R| TC  |   R   |T|E|Atr| R |      Length       |
  * +---------------+---------------+---------------+---------------+
- * |          Completer ID         |CmpSt|B|      Byte Count       |
+ * |          Completer ID         |CplSt|B|      Byte Count       |
  * +---------------+---------------+---------------+---------------+ 
- * |          Requester ID         |     Tag       |R| Lower Addr  |
+ * |          Requester ID         |      Tag      |R| Lower Addr  |
  * +---------------+---------------+---------------+---------------+ 
  */
 
@@ -183,19 +177,21 @@ struct tlp_cpl_hdr {
 	struct tlp_hdr tlp;
 
 	uint16_t completer;
+
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t status :4;	/* Completion status and BCM (not used) */
 	uint16_t count :12;	/* Byte Count */
+	uint8_t status :4;	/* Completion status  */
 #elif __BYTE_ORDER == __BIG_ENDIAN
+	uint8_t status :4;	/* Completion status */
 	uint16_t count :12;	/* Byte Count */
-	uint8_t status :4;	/* Completion status and BCM (not used) */
 #else
-# error "Please fix <bits/endian.h>"
+# error "Please fix <endian.h>"
 #endif
 	uint16_t requester;
 	uint8_t tag;
 	uint8_t lowaddr;
 } __attribute__((packed));
+
 
 #define TLP_CPL_STATUS_MASK	0xE
 #define tlp_cpl_status(st) ((st) & TLP_CPL_STATUS_MASK)

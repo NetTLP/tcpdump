@@ -25,6 +25,7 @@ static const struct tok tlp_attrs[] = {
 	{ 0, NULL }
 };
 
+
 void nettlp_print_mr(netdissect_options *ndo, const struct tlp_mr_hdr *tlpm,
 	u_int length)
 {
@@ -58,6 +59,26 @@ trunc:
 void nettlp_print_cpl(netdissect_options *ndo, const struct tlp_cpl_hdr *tlpc,
 	u_int length)
 {
+	if (length < sizeof(struct tlp_cpl_hdr))
+		goto trunc;
+
+	ND_PRINT("completer %02x:%02x, ", tlp_id_to_bus(tlpc->completer),
+		 tlp_id_to_device(tlpc->completer));
+	if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_SC)
+		ND_PRINT("success, ");
+	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_UR)
+		ND_PRINT("unsupported request, ");
+	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_CRS)
+		ND_PRINT("config request retry, ");
+	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_CA)
+		ND_PRINT("completer abort, ");
+
+	ND_PRINT("byte count %d, ", ntohs(tlpc->count));
+	ND_PRINT("requester %02x:%02x, ", tlp_id_to_bus(tlpc->requester),
+		 tlp_id_to_device(tlpc->requester));
+	ND_PRINT("tag 0x%02x, ", tlpc->tag);
+	ND_PRINT("lowaddr 0x%02x", tlpc->lowaddr);
+
 	return;
 trunc:
 	nd_print_trunc(ndo);
@@ -95,10 +116,10 @@ nettlp_print_tlp(netdissect_options *ndo, const struct tlp_hdr *tlp,
 
 	ND_PRINT("tc %x, ", tlp_tclass(tlp->tclass));
 	ND_PRINT("flags [%s], ", bittok2str_nosep(tlp_flags, "none",
-						  tlp_flag(tlp->flag_len)));
+						  tlp_flag(tlp->flags)));
 	ND_PRINT("attrs [%s], ", bittok2str_nosep(tlp_attrs, "none",
-						  tlp_attr(tlp->flag_len)));
-	ND_PRINT("len %d, ", tlp_len(tlp->flag_len));
+						  tlp_attr(tlp->flags)));
+	ND_PRINT("len %d, ", ntohs(tlp->length));
 
 
 	if (tlp_is_mrd(tlp->fmt_type) || tlp_is_mwr(tlp->fmt_type))
@@ -132,7 +153,6 @@ nettlp_print(netdissect_options *ndo, const u_char *bp, u_int length)
 
 	length -= sizeof(struct nettlp_hdr);
 	nettlp_print_tlp(ndo, (const struct tlp_hdr *)(ntlp + 1), length);
-		
 
 	return;
 
