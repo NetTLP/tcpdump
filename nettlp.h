@@ -124,14 +124,14 @@ struct tlp_hdr {
  * +---------------+---------------+---------------+---------------+
  * |         Requeseter ID         |      Tag      | LastDW| 1stDW |
  * +---------------+---------------+---------------+---------------+
- * |                          Address                          | R |
+ * |                            Address                        | R |
  * +---------------+---------------+---------------+---------------+
  * 
  * or, 64bit address (4DW header)
  * +---------------+---------------+---------------+---------------+
- * |                          Address                              |
+ * |                            Address                            |
  * +---------------+---------------+---------------+---------------+
- * |                          Address                          | R |
+ * |                            Address                        | R |
  * +---------------+---------------+---------------+---------------+
  */
 
@@ -141,11 +141,11 @@ struct tlp_mr_hdr {
 	uint16_t requester;
 	uint8_t	tag;
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-	uint8_t fstdw : 4;
 	uint8_t lstdw : 4;
+	uint8_t fstdw : 4;
 #elif __BYTE_ORDER == __BIG_ENDIAN
-	uint8_t lstdw : 4;
 	uint8_t fstdw : 4;
+	uint8_t lstdw : 4;
 #else
 # error "Please fix <bits/endian.h>"
 #endif
