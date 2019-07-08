@@ -11,7 +11,12 @@
 #include "netdissect.h"
 #include "extract.h"
 
-#include "nettlp.h"
+#include "tlp.h"
+
+struct nettlp_hdr {
+	uint16_t seq;
+	uint32_t tstamp;
+} __attribute__((packed));
 
 static const struct tok tlp_flags[] = {
 	{ TLP_FLAG_DIGEST_MASK, "T" },
@@ -24,7 +29,6 @@ static const struct tok tlp_attrs[] = {
 	{ TLP_ATTR_NOSNP_MASK, "N" },
 	{ 0, NULL }
 };
-
 
 void nettlp_print_mr(netdissect_options *ndo, const struct tlp_mr_hdr *tlpm,
 	u_int length)
@@ -64,16 +68,16 @@ void nettlp_print_cpl(netdissect_options *ndo, const struct tlp_cpl_hdr *tlpc,
 
 	ND_PRINT("completer %02x:%02x, ", tlp_id_to_bus(tlpc->completer),
 		 tlp_id_to_device(tlpc->completer));
-	if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_SC)
+	if (tlp_cpl_status(tlpc->stcnt) == TLP_CPL_STATUS_SC)
 		ND_PRINT("success, ");
-	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_UR)
+	else if (tlp_cpl_status(tlpc->stcnt) == TLP_CPL_STATUS_UR)
 		ND_PRINT("unsupported request, ");
-	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_CRS)
+	else if (tlp_cpl_status(tlpc->stcnt) == TLP_CPL_STATUS_CRS)
 		ND_PRINT("config request retry, ");
-	else if (tlp_cpl_status(tlpc->status) == TLP_CPL_STATUS_CA)
+	else if (tlp_cpl_status(tlpc->stcnt) == TLP_CPL_STATUS_CA)
 		ND_PRINT("completer abort, ");
 
-	ND_PRINT("byte count %d, ", ntohs(tlpc->count));
+	ND_PRINT("byte count %d, ", tlp_cpl_bcnt(tlpc->stcnt));
 	ND_PRINT("requester %02x:%02x, ", tlp_id_to_bus(tlpc->requester),
 		 tlp_id_to_device(tlpc->requester));
 	ND_PRINT("tag 0x%02x, ", tlpc->tag);
@@ -116,10 +120,10 @@ nettlp_print_tlp(netdissect_options *ndo, const struct tlp_hdr *tlp,
 
 	ND_PRINT("tc %x, ", tlp_tclass(tlp->tclass));
 	ND_PRINT("flags [%s], ", bittok2str_nosep(tlp_flags, "none",
-						  tlp_flag(tlp->flags)));
+						  tlp_flag(tlp->falen)));
 	ND_PRINT("attrs [%s], ", bittok2str_nosep(tlp_attrs, "none",
-						  tlp_attr(tlp->flags)));
-	ND_PRINT("len %d, ", ntohs(tlp->length));
+						  tlp_attr(tlp->falen)));
+	ND_PRINT("len %d, ", tlp_length(tlp->falen));
 
 
 	if (tlp_is_mrd(tlp->fmt_type) || tlp_is_mwr(tlp->fmt_type))
@@ -148,7 +152,7 @@ nettlp_print(netdissect_options *ndo, const u_char *bp, u_int length)
 	ntlp = (const struct nettlp_hdr *)bp;
 
 	if (ndo->ndo_vflag)
-		ND_PRINT("Seq=0x%x TS=0x%x",
+		ND_PRINT("seq 0x%04x, tstamp %u, ",
 			 ntohs(ntlp->seq), ntohl(ntlp->tstamp));
 
 	length -= sizeof(struct nettlp_hdr);
