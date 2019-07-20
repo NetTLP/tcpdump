@@ -714,7 +714,8 @@ udp_print(netdissect_options *ndo, const u_char *bp, u_int length,
 			vxlan_gpe_print(ndo, (const u_char *)(up + 1), length);
 		else if (IS_SRC_OR_DST_PORT(ZEP_PORT))
 			zep_print(ndo, (const u_char *)(up + 1), length);
-		else if (IS_SRC_OR_DST_PORT(NETTLP_PORT))
+		else if ((sport >> 4) << 4 == NETTLP_PORT_BASE ||
+			 (dport >> 4) << 4 == NETTLP_PORT_BASE)
 			nettlp_print(ndo, (const u_char *)(up + 1), length);
 		else if (ND_TTEST_1(((const struct LAP *)cp)->type) &&
 			 GET_U_1(((const struct LAP *)cp)->type) == lapDDP &&
