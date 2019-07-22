@@ -236,3 +236,6 @@ struct udphdr {
 #ifndef NETTLP_PORT_BASE
 #define NETTLP_PORT_BASE		12288	/* XXX */
 #endif
+#ifndef NETTLP_PORT_OLD
+#define NETTLP_PORT_OLD			14198	/* NetTLP v0.14 */
+#endif
