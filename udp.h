@@ -233,8 +233,11 @@ struct udphdr {
 #ifndef ZEP_PORT
 #define ZEP_PORT			17754	/* XXX */
 #endif
-#ifndef NETTLP_PORT_BASE
-#define NETTLP_PORT_BASE		12288	/* XXX */
+#ifndef NETTLP_LIBTLP_PORT_BASE
+#define NETTLP_LIBTLP_PORT_BASE		12288	/* XXX */
+#endif
+#ifndef NETTLP_ADAPTER_PORT_BASE
+#define NETTLP_ADAPTER_PORT_BASE	16384	/* XXX */
 #endif
 #ifndef NETTLP_PORT_OLD
 #define NETTLP_PORT_OLD			14198	/* NetTLP v0.14 */

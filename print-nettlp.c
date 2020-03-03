@@ -47,11 +47,11 @@ void nettlp_print_mr(netdissect_options *ndo, const struct tlp_mr_hdr *tlpm,
 	a = (uint32_t *)(tlpm + 1);
 	addr = ntohl(*a);
 	if (tlp_is_3dw(tlpm->tlp.fmt_type)) {
-		ND_PRINT("Addr 0x%08llx", addr);
+		ND_PRINT("Addr 0x%08lx", addr);
 	} else if (tlp_is_4dw(tlpm->tlp.fmt_type)) {
 		a++;
 		addr = (addr << 32) | ntohl(*a);
-		ND_PRINT("Addr 0x%016llx", addr);
+		ND_PRINT("Addr 0x%016lx", addr);
 	}
 
 	return;
